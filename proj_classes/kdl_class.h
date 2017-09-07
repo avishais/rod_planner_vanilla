@@ -92,7 +92,7 @@ public:
 		return IK_time;
 	}
 
-	bool include_joint_limits = false;
+	bool include_joint_limits = true;
 };
 
 

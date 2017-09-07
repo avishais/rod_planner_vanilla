@@ -107,6 +107,8 @@ void StateValidityChecker::printStateVector(const ob::State *state) {
 	cout << "q2: "; printVector(q2);
 }
 
+// -------------------------------- APC functions --------------------------------------
+
 bool StateValidityChecker::close_chain(const ob::State *state, int q1_active_ik_sol) {
 	// c is a 20 dimensional vector composed of [a q1 q2 ik]
 
@@ -151,7 +153,7 @@ bool StateValidityChecker::close_chain(const ob::State *state, int q1_active_ik_
 	return true;
 }
 
-bool StateValidityChecker::project(State a, State &q1, State &q2, int &active_chain, int ik_sol) {
+bool StateValidityChecker::APCproject(State a, State &q1, State &q2, int &active_chain, int ik_sol) {
 
 	IK_counter++;
 	bool valid = false;
@@ -182,7 +184,7 @@ bool StateValidityChecker::project(State a, State &q1, State &q2, int &active_ch
 	return valid;
 }
 
-bool StateValidityChecker::project(State a, State &q1, State &q2, int &active_chain, State ik_nn) {
+bool StateValidityChecker::APCproject(State a, State &q1, State &q2, int &active_chain, State ik_nn) {
 
 	IK_counter++;
 	bool valid = true;
@@ -227,7 +229,7 @@ bool StateValidityChecker::project(State a, State &q1, State &q2, int &active_ch
 	return valid;
 }
 
-bool StateValidityChecker::sample(ob::State *st) {
+bool StateValidityChecker::APCsample(ob::State *st) {
 
 	State a(6), q(12), q1(6), q2(6), ik(2);
 
@@ -244,8 +246,11 @@ bool StateValidityChecker::sample(ob::State *st) {
 		for (int k = 0; k < 10; k++) {
 
 			// Random active chain
-			for (int i = 0; i < 6; i++)
-				q1[i] = ((double) rand() / (RAND_MAX)) * 2 * PI_ - PI_;
+			if (withObs)
+				q1 = rand_q(6);
+			else
+				for (int i = 0; i < 6; i++)
+					q1[i] = ((double) rand() / (RAND_MAX)) * 2 * PI_ - PI_;
 
 			int ik_sol = rand() % 8;
 
@@ -336,6 +341,36 @@ State StateValidityChecker::identify_state_ik(State q1, State q2, Matrix Q) {
 	return ik;
 }
 
+// ----------------------- v GD functions v ----------------------------
+
+bool StateValidityChecker::GDsample(ob::State *st) {
+
+	State a(6), q(12);
+
+	bool flag = true;
+	while (flag) {
+		// Random rod configuration
+		for (int i = 0; i < 6; i++)
+			a[i] = ((double) rand() / (RAND_MAX)) * 2 * 30 - 30;
+		if (!isRodFeasible(a))
+			continue;
+		Matrix Q = getT(get_Points_on_Rod()-1);
+
+		for (int k = 0; k < 10; k++) {
+
+			// Random joint angles
+			if (withObs)
+				q = rand_q(12);
+			else
+				for (int i = 0; i < 12; i++)
+					q[i] = ((double) rand() / (RAND_MAX)) * 2 * PI_ - PI_;
+		}
+	}
+}
+
+// ----------------------- ^ GD functions ^ ----------------------------
+
+
 // ---------------------------------------------------------------
 
 void StateValidityChecker::log_q(State a, State q1, State q2) {
@@ -376,6 +411,49 @@ double StateValidityChecker::normDistance(State a1, State a2) {
 	for (int i=0; i < a1.size(); i++)
 		sum += pow(a1[i]-a2[i], 2);
 	return sqrt(sum);
+}
+
+State StateValidityChecker::join_Vectors(State q1, State q2) {
+
+	State q(q1.size()+q2.size());
+
+	for (int i = 0; i < q1.size(); i++) {
+		q[i] = q1[i];
+		q[i+q1.size()] = q2[i];
+	}
+
+	return q;
+}
+
+void StateValidityChecker::seperate_Vector(State q, State &q1, State &q2) {
+
+	for (int i = 0; i < q.size()/2; i++) {
+		q1[i] = q[i];
+		q2[i] = q[i+q.size()/2];
+	}
+}
+
+
+State StateValidityChecker::rand_q(int nj) {
+
+	State q(nj);
+
+	q[0] = (double)rand()/RAND_MAX * 2* q1minmax - q1minmax;
+	q[1] = (double)rand()/RAND_MAX * 2* q2minmax - q1minmax;
+	q[2] = (double)rand()/RAND_MAX * (q3max - q3min) + q3min;
+	q[3] = (double)rand()/RAND_MAX * 2* q4minmax - q4minmax;
+	q[4] = (double)rand()/RAND_MAX * 2* q5minmax - q5minmax;
+	q[5] = (double)rand()/RAND_MAX * 2* q6minmax - q6minmax;
+
+	if (nj == 12) {
+		q[6] = (double)rand()/RAND_MAX * 2* q1minmax - q1minmax;
+		q[7] = (double)rand()/RAND_MAX * 2* q2minmax - q1minmax;
+		q[8] = (double)rand()/RAND_MAX * (q3max - q3min) + q3min;
+		q[9] = (double)rand()/RAND_MAX * 2* q4minmax - q4minmax;
+		q[10] = (double)rand()/RAND_MAX * 2* q5minmax - q5minmax;
+		q[11] = (double)rand()/RAND_MAX * 2* q6minmax - q6minmax;
+	}
+
 }
 
 

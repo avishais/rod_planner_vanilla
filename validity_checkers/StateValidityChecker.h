@@ -17,6 +17,7 @@
 
 #include "Rod_ODE_class.h"
 #include "abb_apc_class.h"
+#include "kdl_class.h"
 #include "collisionDetection.h"
 
 #include <iostream>
@@ -68,6 +69,8 @@ public:
 	bool checkMotionSerial(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
 	bool checkMotionDecoupled(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol, int nd_out);
 
+	// ----------------------- v APC functions v ----------------------------
+
 	/** Close chain (project) */
 	bool close_chain(const ob::State *state, int);
 
@@ -77,11 +80,21 @@ public:
 	State identify_state_ik(State, State, Matrix);
 
 	/** Project a configuration in the ambient space to the constraint surface (and check collisions and joint limits) */
-	bool project(State a, State &q1, State &q2, int &active_chain, State ik_nn); // Try to project to both the neighbors connected components
-	bool project(State a, State &q1, State &q2, int &active_chain, int); // Try to project to a specific connected component of a certain active chain
+	bool APCproject(State a, State &q1, State &q2, int &active_chain, State ik_nn); // Try to project to both the neighbors connected components
+	bool APCproject(State a, State &q1, State &q2, int &active_chain, int); // Try to project to a specific connected component of a certain active chain
 
 	/** Sample a random configuration */
-	bool sample(ob::State *);
+	bool APCsample(ob::State *);
+
+	// ----------------------- ^ APC functions ^ ----------------------------
+	// ----------------------- v GD functions v ----------------------------
+
+	/** Sample a random configuration */
+	bool GDsample(ob::State *);
+
+	bool GDproject(State, State);
+
+	// ----------------------- ^ GD functions ^ ----------------------------
 
 	/** Log a configuration into path file for simulation */
 	void log_q(State a, State q1, State q2);
@@ -104,6 +117,15 @@ public:
 	void defaultSettings();
 	double normDistance(State, State);
 	double StateDistance(const ob::State *s1, const ob::State *s2);
+
+	/** Join the two robots joint vectors */
+	State join_Vectors(State, State);
+
+	/** Decouple the two robots joint vectors */
+	void seperate_Vector(State, State &, State &);
+
+	/** Generate random angles within joint limits */
+	State rand_q(int);
 
 	int get_valid_solution_index() {
 		return valid_solution_index;
