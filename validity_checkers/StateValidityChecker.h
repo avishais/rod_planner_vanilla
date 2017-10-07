@@ -103,6 +103,7 @@ public:
 
 	/** Sample a random configuration */
 	bool GDsample(ob::State *);
+	bool GDsample(State&, State&);
 
 	/** Project a random configuration */
 	bool GDproject(State, State&);
@@ -122,6 +123,8 @@ public:
 	bool checkMotionRBS(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
 	bool checkMotionRBS(StateVector S1, StateVector S2, int active_chain, int ik_sol, int recursion_depth, int non_decrease_count);
 
+	bool reconstructRBS(const ob::State *s1, const ob::State *s2, Matrix &Confs, Matrix &A);
+	bool reconstructRBS(StateVector S1, StateVector S2, Matrix &M, Matrix &A, int iteration, int last_index, int firstORsecond);
 
 	double normDistanceStateVector(StateVector S1, StateVector S2);
 	void midpoint(StateVector S1, StateVector S2, StateVector &S_mid);

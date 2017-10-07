@@ -303,6 +303,19 @@ bool StateValidityChecker::GDsample(ob::State *st) {
 
 	State a(6), q(12), q1(6), q2(6);
 
+	if (!GDsample(a, q))
+		return false;
+
+	seperate_Vector(q, q1, q2);
+
+	updateStateVector(st, a, q1, q2);
+	return true;
+}
+
+bool StateValidityChecker::GDsample(State &a, State &q) {
+
+	State q1(6), q2(6);
+
 	bool flag = true;
 	while (flag) {
 		// Random rod configuration
@@ -332,7 +345,6 @@ bool StateValidityChecker::GDsample(ob::State *st) {
 		}
 	}
 
-	updateStateVector(st, a, q1, q2);
 	return true;
 }
 
@@ -470,7 +482,7 @@ double StateValidityChecker::StateDistance(const ob::State *s1, const ob::State 
 }
 
 
- // ====================== Check validity ===============================
+// ====================== Check validity ===============================
 
 // Validates a state by computing the passive chain based on a specific IK solution (input) and checking collision
 // Also updates the state after projection
@@ -514,7 +526,7 @@ bool StateValidityChecker::isValid(StateVector &S) {
 	return false;
 }
 
-// ====================== RBS ===============================
+// ====================== v RBS - GD v ===============================
 
 // Calls the Recursive Bi-Section algorithm (Hauser)
 bool StateValidityChecker::checkMotionRBS(const ob::State *s1, const ob::State *s2)
@@ -564,6 +576,74 @@ bool StateValidityChecker::checkMotionRBS(StateVector S1, StateVector S2, int re
 	else
 		return false;
 }
+
+// *************** Reconstruct the RBS - for post-processing and validation
+
+// Calls the Recursive Bi-Section algorithm (Hauser)
+bool StateValidityChecker::reconstructRBS(const ob::State *s1, const ob::State *s2, Matrix &Confs, Matrix &A)
+{
+	// We assume motion starts and ends in a valid configuration - due to projection
+	bool result = true;
+
+	State aa(6), ab(6), qa1(6), qa2(6), qb1(6), qb2(6);
+	retrieveStateVector(s1, aa, qa1, qa2);
+	retrieveStateVector(s2, ab,  qb1, qb2);
+
+	StateVector S1(6);
+	S1.copy(aa, qa1, qa2);
+	StateVector S2(6);
+	S2.copy(ab, qb1, qb2);
+
+	Confs.push_back(S1.q);
+	Confs.push_back(S2.q);
+	A.push_back(S1.a);
+	A.push_back(S2.a);
+
+	return reconstructRBS(S1, S2, Confs, A, 0, 1, 1);
+}
+
+bool StateValidityChecker::reconstructRBS(StateVector S1, StateVector S2, Matrix &M, Matrix &A, int iteration, int last_index, int firstORsecond) {
+	// firstORsecond - tells if the iteration is from the first or second call for the recursion (in the previous iteration).
+	// last_index - the last index that was added to M.
+
+	iteration++;
+
+	// Check if reached the required resolution
+	double d = normDistanceStateVector(S1, S2);
+
+	if (d < RBS_tol)
+		return true;
+
+	if (iteration > RBS_max_depth)// || non_decrease_count > 10)
+		return false;
+
+	StateVector S_mid(6);
+	midpoint(S1, S2, S_mid);
+
+	// Check obstacles collisions and joint limits
+	if (!isValid(S_mid)) // Also updates s_mid with the projected value
+		return false; // Not suppose to happen since we run this function only when local connection feasibility is known
+
+	if (firstORsecond==1) {
+		M.insert(M.begin()+last_index, S_mid.q); // Inefficient operation, but this is only for post-processing and validation
+		A.insert(A.begin()+last_index, S_mid.a);
+	}
+	else {
+		M.insert(M.begin()+(++last_index), S_mid.q); // Inefficient operation, but this is only for post-processing and validation
+		A.insert(A.begin()+last_index, S_mid.a);
+	}
+
+	int prev_size = M.size();
+	if (!reconstructRBS(S1, S_mid, M, A, iteration, last_index, 1))
+		return false;
+	last_index += M.size()-prev_size;
+	if (!reconstructRBS(S_mid, S2, M, A, iteration, last_index, 2))
+		return false;
+
+	return true;
+}
+
+// ====================== ^ RBS - GD ^ ===============================
 
 /*
 // Calls the Recursive Bi-Section algorithm (Hauser)

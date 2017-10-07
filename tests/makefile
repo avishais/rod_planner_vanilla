@@ -28,8 +28,10 @@ CPPROB = ${INC_CLASSES}abb_apc_class.cpp ${INC_CLASSES}kdl_class.cpp ${INC_VALID
 
 all:
 	#$(CXX) test_apc.cpp ${CPPROD} ${CPPROB} ${CPPPQP} -o tapc $(CXXFLAGS) $(LDFLAGS) -std=c++11
-	$(CXX) test_kdl.cpp ${CPPROD} ${CPPROB} ${CPPPQP} -o tkdl $(CXXFLAGS) $(LDFLAGS) -std=c++11
+	#$(CXX) test_kdl.cpp ${CPPROD} ${CPPROB} ${CPPPQP} -o tkdl $(CXXFLAGS) $(LDFLAGS) -std=c++11
 	#$(CXX) gen_rod_confs.cpp ${CPPROD} ${CPPAPC} ${CPPPQP} -o genA $(CXXFLAGS) $(LDFLAGS) -std=c++11
+
+	$(CXX) test_rbs_gd.cpp ${CPPROD} ${CPPROB} ${CPPPQP} -o trbs $(CXXFLAGS) $(LDFLAGS) -std=c++11
 
 
 

@@ -1,0 +1,5 @@
+StateValidChecker.cpp implemented for APC and GD projections.
+
+Implemented RBS but not recontruct.
+
+Next, I would need to write the RBS local-connection checker that can work both with the GD and APC projection methods.

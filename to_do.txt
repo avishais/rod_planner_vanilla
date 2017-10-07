@@ -1,4 +1,5 @@
-In this stage, I am including the GD projection in the StateValidChecker.cpp.
-I stopped in GDsample where I need to add projection of the random point. Then, include GDproject and test everyting.
+StateValidChecker.cpp implemented for APC and GD projections.
 
-Afterwards, I would need to write the RBS local-connection checker that can work both with the GD and APC projection methods.
+Implemented RBS but not recontruct. Next, create reconstruct and test RBS GD.
+
+
