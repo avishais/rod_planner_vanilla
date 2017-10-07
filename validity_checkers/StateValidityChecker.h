@@ -22,6 +22,8 @@
 
 #include <iostream>
 
+#define ROBOTS_DISTANCE 1085.85
+
 namespace ob = ompl::base;
 using namespace std;
 
@@ -34,45 +36,55 @@ public:
 		a.resize(6);
 	}
 
-	void copyVector(State aa, State qq1, State qq2) {
+	void copy(State aa, State qq1, State qq2) {
+		q1 = qq1;
+		q2 = qq2;
 		for (int i = 0; i < n; i++) {
-			q1[i] = qq1[i];
-			q2[i] = qq2[i];
+			q[i] = qq1[i];
+			q[i+6] = qq2[i];
 		}
-		for (int i = 0; i < 6; i++)
-			a[i] = aa[i];
+		a = aa;
+	}
+	void copy(State aa, State qq) {
+		for (int i = 0; i < n; i++) {
+			q1[i] = qq[i];
+			q2[i] = qq[i+6];
+		}
+		q = qq;
+		a = aa;
+	}
+
+	void print() {
+		cout << "a: [";
+		for (int i = 0; i < a.size(); i++)
+			cout << a[i] << " ";
+		cout << "]\n";
+		cout << "q: [";
+		for (int i = 0; i < q.size(); i++)
+			cout << q[i] << " ";
+		cout << "]\n";
 	}
 
 	int n;
 	State q1;
 	State q2;
+	State q;
 	State a;
 };
 
-class StateValidityChecker : public rod_ode, public two_abb_arms, public collisionDetection
+class StateValidityChecker : public rod_ode, public two_abb_arms, public kdl, public collisionDetection
 {
 public:
-	StateValidityChecker(const ob::SpaceInformationPtr &si) : mysi_(si.get()), two_abb_arms({-1085.85/2, 0, 0 }, {1085.85/2, 0, PI_}), collisionDetection(1085.85,0,0,0)
+	StateValidityChecker(const ob::SpaceInformationPtr &si) : mysi_(si.get()), two_abb_arms({-ROBOTS_DISTANCE/2, 0, 0 }, {ROBOTS_DISTANCE/2, 0, PI_}), kdl(ROBOTS_DISTANCE), collisionDetection(ROBOTS_DISTANCE,0,0,0)
 {
 		q_temp.resize(6);
 		close_chain_return_IK.resize(2);
 		q1_prev.resize(6);
 		q2_prev.resize(6);
 }; //Constructor // Avishai
-	StateValidityChecker() : two_abb_arms({-1085.85/2, 0, 0 }, {1085.85/2, 0, PI_}), collisionDetection(1085.85,0,0,0) {};
-
-	// Validity check
-	bool isValid(const ob::State *state);
-	bool isValid(const ob::State *state, int active_chain, int IK_sol);
-	bool isValidSerial(const ob::State *state, int active_chain, int IK_sol);
-	bool checkMotion(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
-	bool checkMotionSerial(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
-	bool checkMotionDecoupled(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol, int nd_out);
+	StateValidityChecker() : two_abb_arms({-ROBOTS_DISTANCE/2, 0, 0 }, {ROBOTS_DISTANCE/2, 0, PI_}), kdl(ROBOTS_DISTANCE), collisionDetection(ROBOTS_DISTANCE,0,0,0) {};
 
 	// ----------------------- v APC functions v ----------------------------
-
-	/** Close chain (project) */
-	bool close_chain(const ob::State *state, int);
 
 	/** Identify the IK solutions of a configuration using two passive chains */
 	State identify_state_ik(const ob::State *);
@@ -92,16 +104,25 @@ public:
 	/** Sample a random configuration */
 	bool GDsample(ob::State *);
 
-	bool GDproject(State, State);
+	/** Project a random configuration */
+	bool GDproject(State, State&);
+	bool GDproject(State &, Matrix);
 
 	// ----------------------- ^ GD functions ^ ----------------------------
 
 	/** Log a configuration into path file for simulation */
 	void log_q(State a, State q1, State q2);
 
+	/** Validity check of a configuration - update state after projection */
+	bool isValid(StateVector &S, int active_chain, int IK_sol); // For APC
+	bool isValid(StateVector &S); // For GD
+
+	bool checkMotionRBS(const ob::State *s1, const ob::State *s2);
+	bool checkMotionRBS(StateVector S1, StateVector S2, int recursion_depth, int non_decrease_count);
 	bool checkMotionRBS(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
-	bool RBS(StateVector S1, StateVector S2, int active_chain, int ik_sol, int recursion_depth, int non_decrease_count);
-	bool isValidRBS(StateVector &S, int active_chain, int IK_sol);
+	bool checkMotionRBS(StateVector S1, StateVector S2, int active_chain, int ik_sol, int recursion_depth, int non_decrease_count);
+
+
 	double normDistanceStateVector(StateVector S1, StateVector S2);
 	void midpoint(StateVector S1, StateVector S2, StateVector &S_mid);
 
@@ -123,9 +144,6 @@ public:
 
 	/** Decouple the two robots joint vectors */
 	void seperate_Vector(State, State &, State &);
-
-	/** Generate random angles within joint limits */
-	State rand_q(int);
 
 	int get_valid_solution_index() {
 		return valid_solution_index;
@@ -150,6 +168,8 @@ private:
 	State q1_prev, q2_prev;
 
 	bool withObs = true; // Include obstacles?
+	double RBS_tol = 0.05;
+	double RBS_max_depth = 100;
 
 };
 

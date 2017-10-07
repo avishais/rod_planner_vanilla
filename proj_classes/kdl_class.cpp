@@ -274,3 +274,24 @@ void kdl::log_q(State q) {
 
 	myfile.close();
 }
+
+State kdl::rand_q(int nj) {
+
+	State q(nj);
+
+	q[0] = (double)rand()/RAND_MAX * 2* q1minmax - q1minmax;
+	q[1] = (double)rand()/RAND_MAX * 2* q2minmax - q1minmax;
+	q[2] = (double)rand()/RAND_MAX * (q3max - q3min) + q3min;
+	q[3] = (double)rand()/RAND_MAX * 2* q4minmax - q4minmax;
+	q[4] = (double)rand()/RAND_MAX * 2* q5minmax - q5minmax;
+	q[5] = (double)rand()/RAND_MAX * 2* q6minmax - q6minmax;
+
+	if (nj == 12) {
+		q[6] = (double)rand()/RAND_MAX * 2* q1minmax - q1minmax;
+		q[7] = (double)rand()/RAND_MAX * 2* q2minmax - q1minmax;
+		q[8] = (double)rand()/RAND_MAX * (q3max - q3min) + q3min;
+		q[9] = (double)rand()/RAND_MAX * 2* q4minmax - q4minmax;
+		q[10] = (double)rand()/RAND_MAX * 2* q5minmax - q5minmax;
+		q[11] = (double)rand()/RAND_MAX * 2* q6minmax - q6minmax;
+	}
+}

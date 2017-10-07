@@ -23,7 +23,7 @@ void load_random_nodes(Matrix &Cdb) {
 	std::ifstream File;
 	File.open("./results/rod_feasible_confs.txt");
 
-	Vector a_temp(6);
+	State a_temp(6);
 
 	int i = 0;
 	while(!File.eof()) {
@@ -55,7 +55,7 @@ int main() {
 	f.open("./results/apc_verification.txt", ios::app);
 
 	int N = 1;//0.5e6;
-	State a (6), q1(6), q2(6);
+	State a(6), q1(6), q2(6);
 	double proj_time = 0;
 	bool suc;
 
@@ -75,7 +75,7 @@ int main() {
 			int active_chain = 1;//rand()/RAND_MAX * 2;
 			int ik_sol = tries;//rand()/RAND_MAX * 8;
 			clock_t begin = clock();
-			suc = svc.project(a, q1, q2, active_chain, ik_sol);
+			suc = svc.APCproject(a, q1, q2, active_chain, ik_sol);
 			proj_time = double(clock() - begin) / CLOCKS_PER_SEC;
 			if (suc) {
 				i++;

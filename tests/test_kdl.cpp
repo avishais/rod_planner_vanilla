@@ -1,5 +1,4 @@
 #include "../validity_checkers/StateValidityChecker.h"
-#include "kdl_class.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +47,6 @@ int main() {
 	cout << "Seed in testing: " << Seed << endl;
 
 	StateValidityChecker svc;
-	kdl K(1085.85);
 
 	Matrix A;
 	load_random_nodes(A);
@@ -56,10 +54,9 @@ int main() {
 	std::ofstream f;
 	f.open("./results/kdl_projection_time.txt", ios::app);
 
-	int N = 100;//0.5e6;
+	int N = 1;//0.5e6;
 	State a(6), q(12), q1(6), q2(6);
 	double proj_time = 0;
-
 
 	int i = 0;
 	while (i < N) {
@@ -80,19 +77,13 @@ int main() {
 
 			//svc.printVector(q);
 			clock_t begin = clock();
-			suc = K.GD(q, Q);
+			suc = svc.GDproject(q, Q);
 			proj_time = double(clock() - begin) / CLOCKS_PER_SEC;
-
-			q = K.get_GD_result();
-			//svc.printVector(q);
 
 			if (suc) {
 				i++;
 
-				for (int j = 0; j < 6; j++) {
-					q1[j] = q[j];
-					q2[j] = q[j+6];
-				}
+				svc.seperate_Vector(q, q1, q2);
 
 				svc.log_q(a, q1, q2);
 				break;

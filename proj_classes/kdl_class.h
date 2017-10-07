@@ -76,6 +76,9 @@ public:
 	/** Log conf. to path.txt file */
 	void log_q(State q);
 
+	/** Random configuration in the ambient space that satisfies joint limits */
+	State rand_q(int);
+
 	/** Returns ABB's link lengths */
 	State get_robots_properties() {
 		State P = {b, l1, l2, l3a, l3b, l4, l5, lee};
