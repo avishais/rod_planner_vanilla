@@ -26,10 +26,10 @@ void StateValidityChecker::retrieveStateVector(const ob::State *state, State &a,
 	const ob::RealVectorStateSpace::StateType *A = C_state->as<ob::RealVectorStateSpace::StateType>(0);
 	const ob::RealVectorStateSpace::StateType *Q = C_state->as<ob::RealVectorStateSpace::StateType>(1);
 
-	for (unsigned i = 0; i < 6; i++) {
+	for (unsigned i = 0; i < 6; i++)
 		a[i] = A->values[i]; // Get state of rod
+	for (unsigned i = 0; i < 12; i++)
 		q[i] = Q->values[i]; // Get state of robots
-	}
 }
 
 void StateValidityChecker::retrieveStateVector(const ob::State *state, State &a) {
@@ -54,16 +54,17 @@ void StateValidityChecker::retrieveStateVector(const ob::State *state, State &a,
 	}
 }
 
-void StateValidityChecker::updateStateVector(const ob::State *state, State q1, State q2) {
+void StateValidityChecker::updateStateVector(const ob::State *state, State a, State q) {
 	// cast the abstract state type to the type we expect
 	const ob::CompoundStateSpace::StateType *C_state = state->as<ob::CompoundStateSpace::StateType>();
-	//const ob::RealVectorStateSpace::StateType *A = C_state->as<ob::RealVectorStateSpace::StateType>(0);
+	const ob::RealVectorStateSpace::StateType *A = C_state->as<ob::RealVectorStateSpace::StateType>(0);
 	const ob::RealVectorStateSpace::StateType *Q = C_state->as<ob::RealVectorStateSpace::StateType>(1);
 
-	for (unsigned i = 0; i < 6; i++) {
-		Q->values[i] = q1[i];
-		Q->values[i+6]= q2[i];
-	}
+	for (unsigned i = 0; i < 6; i++)
+		A->values[i] = a[i];
+
+	for (unsigned i = 0; i < 12; i++)
+		Q->values[i] = q[i];
 }
 
 void StateValidityChecker::updateStateVector(const ob::State *state, State a, State q1, State q2) {
@@ -348,6 +349,23 @@ bool StateValidityChecker::GDsample(State &a, State &q) {
 	return true;
 }
 
+bool StateValidityChecker::GDproject(ob::State *st) {
+
+	State a(6), q(12);
+
+	// Check that 'a' on the random state is feasible
+	retrieveStateVector(st, a, q);
+
+	bool valid = GDproject(a, q);
+
+	if (valid) {
+		updateStateVector(st, a, q);
+		return true;
+	}
+
+	return false;
+}
+
 bool StateValidityChecker::GDproject(State a, State &q) {
 
 	State q1(6), q2(6);
@@ -430,6 +448,41 @@ void StateValidityChecker::log_q(State a, State q1, State q2) {
 		pfile << temp[0] << " " << temp[1] << " "  << temp[2] << endl;
 	}
 	pfile << endl;
+
+	qfile.close();
+	afile.close();
+	pfile.close();
+}
+
+void StateValidityChecker::log_q(Matrix A, Matrix M) {
+	std::ofstream qfile, afile, pfile, ai;
+	qfile.open("../paths/path.txt");
+	afile.open("../paths/afile.txt");
+	pfile.open("../paths/rod_path.txt");
+
+	qfile << M.size() << endl;
+	pfile << M.size()*501 << endl;
+
+	for (int i = 0; i < M.size(); i++) {
+		for (int j = 0; j < 12; j++) {
+			qfile << M[i][j] << " ";
+
+		}
+		for (int j = 0; j < 6; j++) {
+			afile << A[i][j] << " ";
+		}
+		qfile << endl;
+		afile << endl;
+
+		rod_solve(A[i]);
+		State temp(3);
+		// Log points on rod to file
+		for (int k = 0; k < get_Points_on_Rod(); k++) {
+			temp = getP(k);
+			pfile << temp[0] << " " << temp[1] << " "  << temp[2] << endl;
+		}
+		pfile << endl;
+	}
 
 	qfile.close();
 	afile.close();
@@ -542,7 +595,6 @@ bool StateValidityChecker::checkMotionRBS(const ob::State *s1, const ob::State *
 	S1.copy(aa, qa1, qa2);
 	StateVector S2(6);
 	S2.copy(ab, qb1, qb2);
-
 
 	result = checkMotionRBS(S1, S2, 0, 0);
 
@@ -699,8 +751,8 @@ bool StateValidityChecker::checkMotionRBS(StateVector S1, StateVector S2, int ac
 
 double StateValidityChecker::normDistanceStateVector(StateVector S1, StateVector S2) {
 	double sum = 0;
-	for (int i=0; i < S1.n; i++)
-		sum += pow(S1.q1[i]-S2.q1[i], 2) + pow(S1.q2[i]-S2.q2[i], 2);
+	for (int i=0; i < S1.q.size(); i++)
+		sum += pow(S1.q[i]-S2.q[i], 2);
 	for (int i=0; i < 6; i++)
 		sum += pow(S1.a[i]-S2.a[i], 2);
 	return sqrt(sum);
@@ -708,11 +760,38 @@ double StateValidityChecker::normDistanceStateVector(StateVector S1, StateVector
 
 void StateValidityChecker::midpoint(StateVector S1, StateVector S2, StateVector &S_mid) {
 
-	for (int i = 0; i < S_mid.n; i++) {
-		S_mid.q1[i] = (S1.q1[i]+S2.q1[i])/2;
-		S_mid.q2[i] = (S1.q2[i]+S2.q2[i])/2;
-	}
+	State a(6), q(12);
+
+	for (int i = 0; i < 12; i++)
+		q[i] = (S1.q[i]+S2.q[i])/2;
 
 	for (int i = 0; i < 6; i++)
-		S_mid.a[i] = (S1.a[i]+S2.a[i])/2;
+		a[i] = (S1.a[i]+S2.a[i])/2;
+
+	S_mid.copy(a, q);
+}
+
+void StateValidityChecker::LogPerf2file() {
+
+	std::ofstream myfile;
+	myfile.open("./paths/perf_log.txt");
+
+	myfile << final_solved << endl;
+	myfile << PlanDistance << endl; // Distance between nodes 1
+	myfile << total_runtime << endl; // Overall planning runtime 2
+	myfile << get_IK_counter() << endl; // How many IK checks? 5
+	myfile << get_IK_time() << endl; // IK computation time 6
+	myfile << get_collisionCheck_counter() << endl; // How many collision checks? 7
+	myfile << get_collisionCheck_time() << endl; // Collision check computation time 8
+	myfile << get_isValid_counter() << endl; // How many nodes checked 9
+	myfile << nodes_in_path << endl; // Nodes in path 10
+	myfile << nodes_in_trees << endl; // 11
+	myfile << local_connection_time << endl;
+	myfile << local_connection_count << endl;
+	myfile << local_connection_success_count << endl;
+	myfile << sampling_time << endl;
+	myfile << sampling_counter[0] << endl;
+	myfile << sampling_counter[1] << endl;
+
+	myfile.close();
 }

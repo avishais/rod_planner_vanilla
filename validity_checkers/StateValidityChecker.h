@@ -33,6 +33,7 @@ public:
 		n = num;
 		q1.resize(n);
 		q2.resize(n);
+		q.resize(2*n);
 		a.resize(6);
 	}
 
@@ -57,11 +58,11 @@ public:
 	void print() {
 		cout << "a: [";
 		for (int i = 0; i < a.size(); i++)
-			cout << a[i] << " ";
+			cout << a[i] << ", ";
 		cout << "]\n";
 		cout << "q: [";
 		for (int i = 0; i < q.size(); i++)
-			cout << q[i] << " ";
+			cout << q[i] << ", ";
 		cout << "]\n";
 	}
 
@@ -108,18 +109,20 @@ public:
 	/** Project a random configuration */
 	bool GDproject(State, State&);
 	bool GDproject(State &, Matrix);
+	bool GDproject(ob::State *st);
 
 	// ----------------------- ^ GD functions ^ ----------------------------
 
 	/** Log a configuration into path file for simulation */
 	void log_q(State a, State q1, State q2);
+	void log_q(Matrix A, Matrix M);
 
 	/** Validity check of a configuration - update state after projection */
 	bool isValid(StateVector &S, int active_chain, int IK_sol); // For APC
 	bool isValid(StateVector &S); // For GD
 
 	bool checkMotionRBS(const ob::State *s1, const ob::State *s2);
-	bool checkMotionRBS(StateVector S1, StateVector S2, int recursion_depth, int non_decrease_count);
+	bool checkMotionRBS(StateVector S1, StateVector S2, int recursion_depth, int non_decrease_count = 0);
 	bool checkMotionRBS(const ob::State *s1, const ob::State *s2, int active_chain, int ik_sol);
 	bool checkMotionRBS(StateVector S1, StateVector S2, int active_chain, int ik_sol, int recursion_depth, int non_decrease_count);
 
@@ -133,7 +136,7 @@ public:
 	void retrieveStateVector(const ob::State *state, State &a, State &q);
 	void retrieveStateVector(const ob::State *state, State &a, State &q1, State &q2);
 	void retrieveStateVector(const ob::State *state, State &a);
-	void updateStateVector(const ob::State *state, State q1, State q2);
+	void updateStateVector(const ob::State *state, State a, State q2);
 	void updateStateVector(const ob::State *state, State a, State q1, State q2);
 	void updateStateVector(const ob::State *state, State a);
 	void printStateVector(const ob::State *state);
@@ -161,6 +164,41 @@ public:
 	int get_isValid_counter() {
 		return isValid_counter;
 	}
+
+	// Performance parameters and handle
+	double total_runtime; // Total planning time
+	clock_t startTime; // Start clock
+	clock_t endTime; // End clock
+	int nodes_in_path; // Log nodes in path
+	int nodes_in_trees; // Log nodes in both trees
+	double PlanDistance; // Norm distance from start to goal configurations
+	bool final_solved; // Planning query solved?
+	double local_connection_time; // Log LC total time
+	int local_connection_count; // Log number of LC attempts
+	int local_connection_success_count; // Log number of LC success
+	double sampling_time;
+	State sampling_counter;
+
+	/** Reset log parameters */
+	void initiate_log_parameters() {
+		IK_counter = 0;
+		IK_time = 0;
+		collisionCheck_counter = 0;
+		collisionCheck_time = 0;
+		isValid_counter = 0;
+		nodes_in_path = 0;
+		nodes_in_trees = 0;
+		local_connection_time = 0;
+		local_connection_count = 0;
+		local_connection_success_count = 0;
+		sampling_time = 0;
+		sampling_counter.resize(2);
+		sampling_counter[0] = sampling_counter[1] = 0; // [0/1] - successful/failed sampling
+	}
+
+	void LogPerf2file();
+
+
 private:
 	ob::StateSpace *stateSpace_;
 	ob::SpaceInformation    *mysi_;

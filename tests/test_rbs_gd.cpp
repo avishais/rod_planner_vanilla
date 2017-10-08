@@ -38,10 +38,10 @@ int main() {
 
 		cout << "Sampling ... \n";
 
-		//if (!svc.GDsample(a, q))
-		//	continue;
-		a = {1.45713, -3.37275, -1.8302, -2.04125, -22.1294, -2.98455};
-		q = {0.0376216, 1.3736, -1.12007, -2.46517, 1.64635, 2.3698, -0.147351, -0.618145, 0.802898, 0.853924, -0.591288, 1.62258};
+		if (!svc.GDsample(a, q))
+			continue;
+		//a = {1.45713, -3.37275, -1.8302, -2.04125, -22.1294, -2.98455};
+		//q = {0.0376216, 1.3736, -1.12007, -2.46517, 1.64635, 2.3698, -0.147351, -0.618145, 0.802898, 0.853924, -0.591288, 1.62258};
 		S1.copy(a, q);
 		S1.print();
 
@@ -57,7 +57,7 @@ int main() {
 			//if (!svc.GDsample(a, q))
 			//	continue;
 			S2.copy(a, q);
-			interpolate(S1, 0.5, S2);
+			interpolate(S1, 0.5, S2); //(double)rand() / RAND_MAX
 
 			if (svc.GDproject(S2.a, S2.q))
 				break;
@@ -85,55 +85,6 @@ int main() {
 	svc.reconstructRBS(S1, S2, path, A, 0, 1, 1);
 
 	svc.log_q(A, path);
-
-/*
-	int n = 12;
-	State a(6), q1(n), q2(n);
-
-	std::ofstream f;
-	f.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/tests/results/gd_rbs_verification_withObs_env2_distMix.txt", ios::app);
-
-	int N = 2e5, i = 0;
-	while (i < N) {
-		q1 = svc.sample_q();
-		//q2 = svc.sample_q();
-		if (q1[0]==-1000)
-			continue;
-
-		if (1){//rand()%2==0) {
-			double s = fRand(0.01, 1);
-			for (int j = 0; j < n; j++)
-				q2[j] = q1[j] + s * (fRand(-PI, PI)-q1[j]);
-
-			if (!svc.IKproject(q2))
-				continue;
-		}
-		else {
-			q2 = svc.sample_q();
-		}
-
-		clock_t begin = clock();
-		bool vsuc = svc.checkMotionRBS(q1, q2, 0, 0);
-		double rbs_time = double(clock() - begin) / CLOCKS_PER_SEC;
-
-		if (vsuc) {
-			//Matrix path;
-			//path.push_back(q1);
-			//path.push_back(q2);
-			//svc.reconstructRBS(q1, q2, path, 0, 1, 1);
-
-			bool path_valid = true;//vfc.verify_path(path);
-
-			f << vsuc << " " << path_valid << " " << svc.normDistance(q1, q2) << " " << rbs_time << endl;
-		}
-		else
-			f << 0 << " " << 0 << " " << svc.normDistance(q1, q2) << " " << rbs_time << endl;
-		i++;
-	}
-
-	f.close();
-
-	*/
 
 	return 0;
 }

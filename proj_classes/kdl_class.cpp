@@ -294,4 +294,6 @@ State kdl::rand_q(int nj) {
 		q[10] = (double)rand()/RAND_MAX * 2* q5minmax - q5minmax;
 		q[11] = (double)rand()/RAND_MAX * 2* q6minmax - q6minmax;
 	}
+
+	return q;
 }
