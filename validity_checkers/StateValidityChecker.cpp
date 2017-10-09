@@ -425,9 +425,9 @@ bool StateValidityChecker::GDproject(State &q, Matrix Q) {
 
 void StateValidityChecker::log_q(State a, State q1, State q2) {
 	std::ofstream qfile, afile, pfile, ai;
-	qfile.open("../paths/path.txt");
-	afile.open("../paths/afile.txt");
-	pfile.open("../paths/rod_path.txt");
+	qfile.open("./paths/path.txt");
+	afile.open("./paths/afile.txt");
+	pfile.open("./paths/rod_path.txt");
 
 	qfile << 1 << endl;
 	pfile << 501 << endl;
@@ -456,9 +456,9 @@ void StateValidityChecker::log_q(State a, State q1, State q2) {
 
 void StateValidityChecker::log_q(Matrix A, Matrix M) {
 	std::ofstream qfile, afile, pfile, ai;
-	qfile.open("../paths/path.txt");
-	afile.open("../paths/afile.txt");
-	pfile.open("../paths/rod_path.txt");
+	qfile.open("./paths/path.txt");
+	afile.open("./paths/afile.txt");
+	pfile.open("./paths/rod_path.txt");
 
 	qfile << M.size() << endl;
 	pfile << M.size()*501 << endl;
@@ -779,8 +779,8 @@ void StateValidityChecker::LogPerf2file() {
 	myfile << final_solved << endl;
 	myfile << PlanDistance << endl; // Distance between nodes 1
 	myfile << total_runtime << endl; // Overall planning runtime 2
-	myfile << get_IK_counter() << endl; // How many IK checks? 5
-	myfile << get_IK_time() << endl; // IK computation time 6
+	myfile << kdl::get_IK_counter() << endl; // How many IK checks? 5
+	myfile << kdl::get_IK_time() << endl; // IK computation time 6
 	myfile << get_collisionCheck_counter() << endl; // How many collision checks? 7
 	myfile << get_collisionCheck_time() << endl; // Collision check computation time 8
 	myfile << get_isValid_counter() << endl; // How many nodes checked 9
@@ -792,6 +792,9 @@ void StateValidityChecker::LogPerf2file() {
 	myfile << sampling_time << endl;
 	myfile << sampling_counter[0] << endl;
 	myfile << sampling_counter[1] << endl;
+	myfile << get_odes_counter() << endl;
+	myfile << get_valid_odes_counter() << endl;
+	myfile << get_odes_time() << endl;
 
 	myfile.close();
 }

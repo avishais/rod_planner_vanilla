@@ -235,7 +235,7 @@ ompl::base::PlannerStatus ompl::geometric::CBiRRT::solve(const base::PlannerTerm
 	base::State *start_node = si_->allocState();
 	setRange(Range); // Maximum local connection distance *** will need to profile this value
 
-	State a(6), q(12);
+	State a(6), q(12), q1(6), q2(6);
 
 	checkValidity();
 	startTime = clock();
@@ -605,7 +605,7 @@ void ompl::geometric::CBiRRT::save2file(vector<Motion*> mpath1, vector<Motion*> 
 		std::ifstream myfile1;
 		myfile.open("./paths/temp.txt",ios::out);
 		myfiler.open("./paths/temp_rod.txt",ios::out);
-		afile.open("afile.txt");
+		afile.open("./paths/afile.txt");
 
 		//myfile << mpath1.size() + mpath2.size() << endl;
 
@@ -668,7 +668,8 @@ void ompl::geometric::CBiRRT::save2file(vector<Motion*> mpath1, vector<Motion*> 
 			}
 		}
 		myfile.close();
-				myfiler.close();
+		myfiler.close();
+		afile.close();
 
 		/** Update file with number of conf. */
 
@@ -688,7 +689,6 @@ void ompl::geometric::CBiRRT::save2file(vector<Motion*> mpath1, vector<Motion*> 
 		myfile1.open("./paths/temp_rod.txt",ios::in);
 		fp.open("./paths/rod_path.txt",ios::out);
 		fp << count*501 << endl;
-		std::string line;
 		while(myfile1.good()) {
 			std::getline(myfile1, line ,'\n');
 			fp << line << endl;

@@ -47,29 +47,29 @@ ob::PlannerPtr plan_C::allocatePlanner(ob::SpaceInformationPtr si, plannerType p
     {
         case PLANNER_CBIRRT:
         {
-            return std::make_shared<og::CBiRRT>(si, maxStep, env);
+            return std::make_shared<og::CBiRRT>(si, maxStep);
             break;
         }
-        /*case PLANNER_RRT:
+        case PLANNER_RRT:
         {
-            return std::make_shared<og::RRT>(si, maxStep, env);
+            return std::make_shared<og::RRT>(si, maxStep);
             break;
         }
-        case PLANNER_LAZYRRT:
+        /*case PLANNER_LAZYRRT:
         {
-            return std::make_shared<og::LazyRRT>(si, maxStep, env);
+            return std::make_shared<og::LazyRRT>(si, maxStep);
             break;
-        }
+        }*/
         case PLANNER_PRM:
         {
-            return std::make_shared<og::PRM>(si, env);
+            return std::make_shared<og::PRM>(si);
             break;
         }
         case PLANNER_SBL:
         {
-            return std::make_shared<og::SBL>(si, maxStep, env);
+            return std::make_shared<og::SBL>(si, maxStep);
             break;
-        }*/
+        }
         default:
         {
             OMPL_ERROR("Planner-type enum is not implemented in allocation function.");
@@ -228,8 +228,8 @@ int main(int argn, char ** args) {
 		runtime = atof(args[1]);
 		switch (atoi(args[2])) {
 		case 1 :
-			ptype = PLANNER_BIRRT;
-			plannerName = "BiRRT";
+			ptype = PLANNER_CBIRRT;
+			plannerName = "CBiRRT";
 			break;
 		case 2 :
 			ptype = PLANNER_RRT;
@@ -263,27 +263,24 @@ int main(int argn, char ** args) {
 
 	State c_start, c_goal;
 	if (env == 1) {
-		c_start = {0.5236, 1.7453, -1.8326, -1.4835,	1.5708,	0, 1.004278, 0.2729, 0.9486, -1.15011, 1.81001, -1.97739};
-		//State c_goal = {0.5236, 0.34907, 0.69813, -1.3963, 1.5708, 0, -2.432, -1.4148, -1.7061, -1.6701, -1.905, 1.0015}; // Robot 2 backfilp - Elbow down
-		c_goal = {0.5236, 0.34907, 0.69813, -1.3963, 1.5708, 0, 0.7096, 1.8032, -1.7061, -1.6286, 1.9143, -2.0155}; // Robot 2 no backflip - Elbow down
-		Plan.set_environment(1);
+		c_start = {1.13317, -4.08401, 2.74606, 6.786018, 11.63367, -5.103594, -0.209439510239320, 0.122173047639603,	0.174532925199433, 1.30899693899575, 0.261799387799149, 0.698131700797732, -0.106584015572764, 1.06335198985049, 0.282882132165777, -0.115210802424076, -1.95829181139617, -1.35961844319303};
+		c_goal = {1.8708,-1.3245,2.944,3.7388,6.5021,-0.01924,0.4,0.3,1,-0.1,-0.57118,-0.4,-0.84385,0.73392,0.2169,0.52291,-1.1915,2.6346};
+
 	}
 	else if (env == 2) {
-		c_start = {1.1, 1.1, 0, 1.24, -1.5708, 0, -0.79567, 0.60136, 0.43858, -0.74986, -1.0074, -0.092294};
-		c_goal = {-1.1, 1.35, -0.2, -1, -1.9, 0, 0.80875, 0.72363, -0.47891, -1.0484, 0.73278, 1.7491};
-		Plan.set_environment(2);
+
 	}
 
 	int mode = 1;
 	switch (mode) {
 	case 1: {
-		Plan.plan(c_start, c_goal, runtime, ptype, 2.6);
+		Plan.plan(c_start, c_goal, runtime, ptype, 0.5);
 
 		break;
 	}
 	case 2 : { // Benchmark planning time with constant maximum step size
 		ofstream GD;
-		GD.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/matlab/profile/profile_" + plannerName + "_GD_env2.txt", ios::app);
+		GD.open("./matlab/profile/profile_" + plannerName + "_GD_env2.txt", ios::app);
 
 		for (int k = 0; k < 100; k++) {
 			//Plan.plan(c_start, c_goal, runtime, ptype, 2.6); // CBiRRT
@@ -291,7 +288,7 @@ int main(int argn, char ** args) {
 
 			// Extract from perf file
 			ifstream FromFile;
-			FromFile.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/paths/perf_log.txt");
+			FromFile.open("./paths/perf_log.txt");
 			string line;
 			while (getline(FromFile, line))
 				GD << line << "\t";
@@ -304,9 +301,9 @@ int main(int argn, char ** args) {
 	case 3 : { // Benchmark maximum step size
 		ofstream GD;
 		if (env == 1)
-			GD.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/matlab/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
+			GD.open("./matlab/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
 		else if (env == 2)
-			GD.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/matlab/env2/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
+			GD.open("./matlab/env2/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
 
 		for (int k = 0; k < 250; k++) {
 
@@ -321,7 +318,7 @@ int main(int argn, char ** args) {
 
 				// Extract from perf file
 				ifstream FromFile;
-				FromFile.open("/home/avishai/Downloads/omplapp/ompl/Workspace/ckc3d/paths/perf_log.txt");
+				FromFile.open("./paths/perf_log.txt");
 				string line;
 				while (getline(FromFile, line))
 					GD << line << "\t";

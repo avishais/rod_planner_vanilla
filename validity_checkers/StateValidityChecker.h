@@ -181,8 +181,8 @@ public:
 
 	/** Reset log parameters */
 	void initiate_log_parameters() {
-		IK_counter = 0;
-		IK_time = 0;
+		kdl::IK_counter = 0;
+		kdl::IK_time = 0;
 		collisionCheck_counter = 0;
 		collisionCheck_time = 0;
 		isValid_counter = 0;
@@ -209,7 +209,7 @@ private:
 	State q1_prev, q2_prev;
 
 	bool withObs = true; // Include obstacles?
-	double RBS_tol = 0.05;
+	double RBS_tol = 0.1;
 	double RBS_max_depth = 100;
 
 };
