@@ -140,14 +140,14 @@ void plan_C::plan(State c_start, State c_goal, double runtime, plannerType ptype
 	for (int i = 0; i < 6; i++)
 			start->as<ob::RealVectorStateSpace::StateType>(0)->values[i] = c_start[i]; // Access the first component of the start a-state
 	for (int i = 0; i < 12; i++)
-		start->as<ob::RealVectorStateSpace::StateType>(1)->values[i] = c_start[i+6]; // Access the first component of the start a-state
+		start->as<ob::RealVectorStateSpace::StateType>(1)->values[i] = c_start[i+6];
 
 	// create goal state
 	ob::ScopedState<ob::CompoundStateSpace> goal(Cspace);
 	for (int i = 0; i < 6; i++)
 		goal->as<ob::RealVectorStateSpace::StateType>(0)->values[i] = c_goal[i]; // Access the first component of the goal a-state
 	for (int i = 0; i < 12; i++)
-		goal->as<ob::RealVectorStateSpace::StateType>(1)->values[i] = c_goal[i+6]; // Access the first component of the goal a-state
+		goal->as<ob::RealVectorStateSpace::StateType>(1)->values[i] = c_goal[i+6];
 
 	// create a problem instance
 	ob::ProblemDefinitionPtr pdef(new ob::ProblemDefinition(si));
@@ -156,10 +156,18 @@ void plan_C::plan(State c_start, State c_goal, double runtime, plannerType ptype
 	pdef->setStartAndGoalStates(start, goal);
 	pdef->print();
 
+	// Register new projection evaluator
+	if (ptype == PLANNER_SBL) {
+		//Cspace->registerProjection("myProjection", ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
+		Cspace->registerDefaultProjection(ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
+	}
+
 	maxStep = max_step;
 	// create a planner for the defined space
 	// To add a planner, the #include library must be added above
 	ob::PlannerPtr planner = allocatePlanner(si, ptype);
+
+	//planner->as<og::SBL>()->setProjectionEvaluator("myProjection");
 
 	// set the problem we are trying to solve for the planner
 	planner->setProblemDefinition(pdef);
@@ -271,7 +279,7 @@ int main(int argn, char ** args) {
 
 	}
 
-	int mode = 1;
+	int mode = 3;
 	switch (mode) {
 	case 1: {
 		Plan.plan(c_start, c_goal, runtime, ptype, 0.5);
@@ -299,34 +307,34 @@ int main(int argn, char ** args) {
 		break;
 	}
 	case 3 : { // Benchmark maximum step size
-		ofstream GD;
+		ofstream F;
 		if (env == 1)
-			GD.open("./matlab/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
+			F.open("./matlab/Benchmark_" + plannerName + "_env1_rB.txt", ios::app);
 		else if (env == 2)
-			GD.open("./matlab/env2/Benchmark_" + plannerName + "_GD_3poles_rB.txt", ios::app);
+			F.open("./matlab/Benchmark_" + plannerName + "_env2_rB.txt", ios::app);
 
 		for (int k = 0; k < 250; k++) {
 
-			for (int j = 0; j < 1; j++) {
-				double maxStep = 0;//.2 + 0.2*j;
+			for (int j = 0; j < 11; j++) {
+				double maxStep = 0.2 + 0.3*j;
 
-				cout << "** Running GD iteration " << k << " with maximum step: " << maxStep << " **" << endl;
+				cout << "** Running Rod planning, iteration " << k+1 << " with maximum step: " << maxStep << " **" << endl;
 
 				Plan.plan(c_start, c_goal, runtime, ptype, maxStep);
 
-				GD << maxStep << "\t";
+				F << maxStep << "\t";
 
 				// Extract from perf file
 				ifstream FromFile;
 				FromFile.open("./paths/perf_log.txt");
 				string line;
 				while (getline(FromFile, line))
-					GD << line << "\t";
+					F << line << "\t";
 				FromFile.close();
-				GD << endl;
+				F << endl;
 			}
 		}
-		GD.close();
+		F.close();
 		break;
 	}
 	}

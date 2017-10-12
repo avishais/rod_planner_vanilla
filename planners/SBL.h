@@ -45,8 +45,39 @@
 
 #include "../validity_checkers/StateValidityChecker.h"
 
+class MyProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+	MyProjection(const ompl::base::StateSpacePtr &space) : ompl::base::ProjectionEvaluator(space)
+	{
+	}
+	virtual unsigned int getDimension(void) const
+	{
+		return 3;
+	}
+	virtual void defaultCellSizes(void)
+	{
+		cellSizes_.resize(3);
+		cellSizes_[0] = 2;
+		cellSizes_[1] = 0.3;
+		cellSizes_[2] = 0.3;
+	}
+	virtual void project(const ompl::base::State *state, ompl::base::EuclideanProjection &projection) const
+	{
+		const ompl::base::CompoundStateSpace::StateType *C_state = state->as<ompl::base::CompoundStateSpace::StateType>();
+		const ompl::base::RealVectorStateSpace::StateType *A = C_state->as<ompl::base::RealVectorStateSpace::StateType>(0);
+		const ompl::base::RealVectorStateSpace::StateType *Q = C_state->as<ompl::base::RealVectorStateSpace::StateType>(1);
+
+		projection(0) = (A->values[0] + A->values[3]) / 2;
+		projection(1) = (Q->values[0] + Q->values[6]) / 2;
+		projection(2) = (Q->values[2] + Q->values[8]) / 2;
+	}
+};
+
+
 namespace ompl
 {
+
 
 namespace geometric
 {
@@ -282,9 +313,9 @@ protected:
 	/** \brief The pair of states in each tree connected during planning.  Used for PlannerData computation */
 	std::pair<base::State*, base::State*>      connectionPoint_;
 
-    // ***************** My additional functions ************************
-    /** \brief Save solution path to two files */
-    void save2file(vector<Motion*>, vector<Motion*>);
+	// ***************** My additional functions ************************
+	/** \brief Save solution path to two files */
+	void save2file(vector<Motion*>, vector<Motion*>);
 };
 
 }

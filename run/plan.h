@@ -41,6 +41,8 @@ enum plannerType
 	PLANNER_SBL
 };
 
+
+
 bool isStateValid(const ob::State *state);
 
 // Prototypes

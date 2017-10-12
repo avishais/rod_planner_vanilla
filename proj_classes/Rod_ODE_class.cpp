@@ -642,8 +642,7 @@ bool rod_ode::isRodFeasible(State a) {
 	// Scan the determinant from the end of the rod and not from the beginning
 	for (int i = points_on_rod-1; i >= 0; i--) {
 		if (determinant(J[i]) <= 0) {
-			clock_t end = clock();
-			odes_time += double(end - begin) / CLOCKS_PER_SEC;
+			odes_time += double(clock() - begin) / CLOCKS_PER_SEC;
 			return false;
 		}
 	}
@@ -653,14 +652,12 @@ bool rod_ode::isRodFeasible(State a) {
 
 	// Check for rod collision
 	if (Rod_Collision()) {
-		clock_t end = clock();
-		odes_time += double(end - begin) / CLOCKS_PER_SEC;
+		odes_time += double(clock() - begin) / CLOCKS_PER_SEC;
 		valid_odes_counter++;
 		return true;
 	}
 	else {
-		clock_t end = clock();
-		odes_time += double(end - begin) / CLOCKS_PER_SEC;
+		odes_time += double(clock() - begin) / CLOCKS_PER_SEC;
 		return false;
 	}
 }

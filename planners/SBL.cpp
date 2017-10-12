@@ -48,10 +48,10 @@ ompl::geometric::SBL::SBL(const base::SpaceInformationPtr &si, double maxStep) :
 	maxDistance_ = 0.0;
 	connectionPoint_ = std::make_pair<base::State*, base::State*>(nullptr, nullptr);
 
-	defaultSettings();
-
 	Planner::declareParam<double>("range", this, &SBL::setRange, &SBL::getRange, "0.:1.:10000.");
 
+	defaultSettings();
+	
 	Range = maxStep;
 }
 

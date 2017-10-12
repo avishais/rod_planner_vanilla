@@ -194,6 +194,9 @@ public:
 		sampling_time = 0;
 		sampling_counter.resize(2);
 		sampling_counter[0] = sampling_counter[1] = 0; // [0/1] - successful/failed sampling
+		odes_time = 0;
+		valid_odes_counter = 0;
+		odes_counter = 0;
 	}
 
 	void LogPerf2file();
