@@ -171,8 +171,14 @@ ompl::base::PlannerStatus ompl::geometric::RRT::solve(const base::PlannerTermina
 		// If not goal, then must project
 		if (!(gg && reach)) {
 			// Project dstate (which currently is not on the manifold)
-			if (!GDproject(dstate)) // Collision check is done inside the projection
+			clock_t sT = clock();
+			if (!GDproject(dstate)) { // Collision check is done inside the projection
+				sampling_time += double(clock() - sT) / CLOCKS_PER_SEC;
+				sampling_counter[1]++;
 				continue;
+			}
+			sampling_time += double(clock() - sT) / CLOCKS_PER_SEC;
+			sampling_counter[0]++;
 
 			si_->copyState(xstate, dstate);
 			dstate = xstate;

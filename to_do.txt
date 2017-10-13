@@ -1,5 +1,0 @@
-StateValidChecker.cpp implemented for APC and GD projections.
-
-Implemented RBS and recontruct. Next,  test RBS GD.
-
-

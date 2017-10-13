@@ -776,8 +776,6 @@ void StateValidityChecker::LogPerf2file() {
 	std::ofstream myfile;
 	myfile.open("./paths/perf_log.txt");
 
-
-
 	myfile << final_solved << endl;
 	myfile << PlanDistance << endl; // Distance between nodes 1
 	myfile << total_runtime << endl; // Overall planning runtime 2

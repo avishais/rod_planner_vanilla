@@ -279,16 +279,16 @@ int main(int argn, char ** args) {
 
 	}
 
-	int mode = 3;
+	int mode = 1;
 	switch (mode) {
 	case 1: {
-		Plan.plan(c_start, c_goal, runtime, ptype, 0.5);
+		Plan.plan(c_start, c_goal, runtime, ptype, 1.1);
 
 		break;
 	}
 	case 2 : { // Benchmark planning time with constant maximum step size
 		ofstream GD;
-		GD.open("./matlab/profile/profile_" + plannerName + "_GD_env2.txt", ios::app);
+		GD.open("./matlab/profile/profile_" + plannerName + "_env1.txt", ios::app);
 
 		for (int k = 0; k < 100; k++) {
 			//Plan.plan(c_start, c_goal, runtime, ptype, 2.6); // CBiRRT
@@ -313,7 +313,8 @@ int main(int argn, char ** args) {
 		else if (env == 2)
 			F.open("./matlab/Benchmark_" + plannerName + "_env2_rB.txt", ios::app);
 
-		for (int k = 0; k < 250; k++) {
+		//State v = {0.8, 1.7, 2.6};
+		for (int k = 0; k < 100; k++) {
 
 			for (int j = 0; j < 11; j++) {
 				double maxStep = 0.2 + 0.3*j;

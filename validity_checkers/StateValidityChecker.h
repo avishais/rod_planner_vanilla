@@ -214,7 +214,6 @@ private:
 	bool withObs = true; // Include obstacles?
 	double RBS_tol = 0.1;
 	double RBS_max_depth = 100;
-
 };
 
 
