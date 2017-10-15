@@ -270,12 +270,13 @@ bool ompl::geometric::SBL::checkSolution(bool start, TreeData &tree, TreeData &o
 				if (!start)
 					mpath1.swap(mpath2);
 
-				final_solved = true;
-				LogPerf2file(); // Log planning parameters
 				nodes_in_path = mpath1.size() + mpath2.size();
 				nodes_in_trees = tree.size + otherTree.size;
 
-				save2file(mpath1, mpath2);
+				final_solved = true;
+				LogPerf2file(); // Log planning parameters
+
+				//save2file(mpath1, mpath2);
 				cout << "Path from tree 1 size: " << mpath1.size() << ", path from tree 2 size: " << mpath2.size() << endl;
 
 				for (int i = mpath1.size() - 1 ; i >= 0 ; --i)

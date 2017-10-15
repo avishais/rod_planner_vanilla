@@ -315,6 +315,7 @@ void ompl::geometric::PRM::growRoadmap(const base::PlannerTerminationCondition &
 		while (!found && ptc == false)
 		{
 			unsigned int attempts = 0;
+			clock_t sT = clock();
 			do
 			{
 				found = GDsample(workState);
@@ -322,10 +323,15 @@ void ompl::geometric::PRM::growRoadmap(const base::PlannerTerminationCondition &
 
 				attempts++;
 			} while (attempts < magic::FIND_VALID_STATE_ATTEMPTS_WITHOUT_TERMINATION_CHECK && !found);
+			sampling_time = double(clock() - sT) / CLOCKS_PER_SEC;
 		}
 		// add it as a milestone
-		if (found)
+		if (found) {
+			sampling_counter[0]++;
 			addMilestone(si_->cloneState(workState));
+		}
+		else
+			sampling_counter[1]++;
 	}
 }
 

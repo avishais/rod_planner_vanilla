@@ -48,7 +48,7 @@ ompl::geometric::RRT::RRT(const base::SpaceInformationPtr &si, double maxStep) :
 
 	defaultSettings(); // Avishai
 
-	goalBias_ = 0.05;
+	goalBias_ = 0.15;
 	maxDistance_ = 0.0;
 	lastGoalMotion_ = nullptr;
 
@@ -141,6 +141,9 @@ ompl::base::PlannerStatus ompl::geometric::RRT::solve(const base::PlannerTermina
 	goal_s->sampleGoal(rstate);
 	PlanDistance = si_->distance(start_node, rstate);
 
+	Motion *gmotion = new Motion(si_);
+	si_->copyState(gmotion->state, rstate);
+
 	while (ptc == false)
 	{
 
@@ -149,6 +152,7 @@ ompl::base::PlannerStatus ompl::geometric::RRT::solve(const base::PlannerTermina
 		if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample()) {
 			goal_s->sampleGoal(rstate);
 			gg = true;
+			cout << "gg" << endl;
 		}
 		else
 			sampler_->sampleUniform(rstate);
@@ -201,7 +205,14 @@ ompl::base::PlannerStatus ompl::geometric::RRT::solve(const base::PlannerTermina
 			nn_->add(motion);
 			double dist = 0.0;
 			bool sat = goal->isSatisfied(motion->state, &dist);
-			if (sat)
+
+			Motion *hmotion = nn_->nearest(gmotion);
+			cout << dist << " " << si_->distance(hmotion->state, gmotion->state) << endl;
+
+
+			dist = si_->distance(nmotion->state, gmotion->state);
+			//if (sat)
+			if (dist < 0.05)
 			{
 				approxdif = dist;
 				solution = motion;

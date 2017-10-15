@@ -6,8 +6,8 @@ clear all
 clc
 
 %%
-planners = {'CBiRRT','RRT','LazyRRT','SBL'};
-plannerType = planners{2};
+planners = {'CBiRRT','RRT','SBL','LazyRRT'};
+plannerType = planners{3};
 switch plannerType
     case 'CBiRRT'
         D = load('Benchmark_CBiRRT_env1_rB.txt'); D = D(D(:,2)==1,:);
