@@ -370,27 +370,19 @@ bool StateValidityChecker::GDproject(State a, State &q) {
 
 	State q1(6), q2(6);
 
-	kdl::IK_counter++;
-	clock_t sT = clock();
-
 	if (!isRodFeasible(a))
 		return false;
 	Matrix Q = getT(get_Points_on_Rod()-1);
 
-	if (!GD(q, Q)) { // GD checks for joint limits
-		kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
+	if (!GD(q, Q)) // GD checks for joint limits
 		return false;
-	}
 
 	q = get_GD_result();
 
 	seperate_Vector(q, q1, q2);
-	if (withObs && collision_state(getPMatrix(), q1, q2)) {
-		kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
+	if (withObs && collision_state(getPMatrix(), q1, q2))
 		return false;
-	}
 
-	kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
 	return true;
 }
 
@@ -398,23 +390,15 @@ bool StateValidityChecker::GDproject(State &q, Matrix Q) {
 
 	State q1(6), q2(6);
 
-	kdl::IK_counter++;
-	clock_t sT = clock();
-
-	if (!GD(q, Q)) { // GD checks for joint limits
-		kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
+	if (!GD(q, Q)) // GD checks for joint limits
 		return false;
-	}
 
 	q = get_GD_result();
 
 	seperate_Vector(q, q1, q2);
-	if (withObs && collision_state(getPMatrix(), q1, q2)) {
-		kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
+	if (withObs && collision_state(getPMatrix(), q1, q2))
 		return false;
-	}
 
-	kdl::IK_time += double(clock() - sT) / CLOCKS_PER_SEC;
 	return true;
 }
 
@@ -775,6 +759,8 @@ void StateValidityChecker::LogPerf2file() {
 
 	std::ofstream myfile;
 	myfile.open("./paths/perf_log.txt");
+
+
 
 	myfile << final_solved << endl;
 	myfile << PlanDistance << endl; // Distance between nodes 1

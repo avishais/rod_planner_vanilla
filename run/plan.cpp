@@ -222,14 +222,18 @@ int main(int argn, char ** args) {
 	string plannerName;
 	int env; // Tested environment index
 
+	// Input ./<exefile> <runtime> <planner> <environement>
+
 	if (argn == 1) {
 		runtime = 1; // sec
 		ptype = PLANNER_CBIRRT;
+		plannerName = "CBiRRT";
 		env = 1;
 	}
 	else if (argn == 2) {
 		runtime = atof(args[1]);
 		ptype = PLANNER_CBIRRT;
+		plannerName = "CBiRRT";
 		env = 1;
 	}
 	else if (argn > 2) {
@@ -271,9 +275,8 @@ int main(int argn, char ** args) {
 
 	State c_start, c_goal;
 	if (env == 1) {
-		c_goal = {1.13317, -4.08401, 2.74606, 6.786018, 11.63367, -5.103594, -0.209439510239320, 0.122173047639603,	0.174532925199433, 1.30899693899575, 0.261799387799149, 0.698131700797732, -0.106584015572764, 1.06335198985049, 0.282882132165777, -0.115210802424076, -1.95829181139617, -1.35961844319303};
-		c_start = {1.8708,-1.3245,2.944,3.7388,6.5021,-0.01924,0.4,0.3,1,-0.1,-0.57118,-0.4,-0.84385,0.73392,0.2169,0.52291,-1.1915,2.6346};
-
+		c_start = {1.13317, -4.08401, 2.74606, 6.786018, 11.63367, -5.103594, -0.209439510239320, 0.122173047639603,	0.174532925199433, 1.30899693899575, 0.261799387799149, 0.698131700797732, -0.106584015572764, 1.06335198985049, 0.282882132165777, -0.115210802424076, -1.95829181139617, -1.35961844319303};
+		c_goal = {1.8708,-1.3245,2.944,3.7388,6.5021,-0.01924,0.4,0.3,1,-0.1,-0.57118,-0.4,-0.84385,0.73392,0.2169,0.52291,-1.1915,2.6346};
 	}
 	else if (env == 2) {
 
@@ -282,17 +285,17 @@ int main(int argn, char ** args) {
 	int mode = 1;
 	switch (mode) {
 	case 1: {
-		Plan.plan(c_start, c_goal, runtime, ptype, 1.1);
+		Plan.plan(c_start, c_goal, runtime, ptype, 2.6);
 
 		break;
 	}
 	case 2 : { // Benchmark planning time with constant maximum step size
 		ofstream GD;
-		GD.open("./matlab/profile/profile_" + plannerName + "_env1.txt", ios::app);
+		GD.open("./matlab/Benchmark_" + plannerName + "_env1_temp.txt", ios::app);
 
-		for (int k = 0; k < 100; k++) {
+		for (int k = 0; k < 10; k++) {
 			//Plan.plan(c_start, c_goal, runtime, ptype, 2.6); // CBiRRT
-			Plan.plan(c_start, c_goal, runtime, ptype, 0.6); // SBL
+			Plan.plan(c_start, c_goal, runtime, ptype, 1.7); // SBL & RRT
 
 			// Extract from perf file
 			ifstream FromFile;
@@ -316,8 +319,8 @@ int main(int argn, char ** args) {
 		//State v = {0.8, 1.7, 2.6};
 		for (int k = 0; k < 100; k++) {
 
-			for (int j = 0; j < 1; j++) {
-				double maxStep = 0;//1.4 + 0.3*j;
+			for (int j = 0; j < 11; j++) {
+				double maxStep = 0.2 + 0.3*j;
 
 				cout << "** Running Rod planning, iteration " << k+1 << " with maximum step: " << maxStep << " **" << endl;
 
