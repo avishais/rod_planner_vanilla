@@ -22,6 +22,7 @@ for i = 1:length(T)
 end
 T1 = [0 T];
 M1 = [1 M];
+
 %% RRT
 d = 1.7;
 
@@ -71,6 +72,5 @@ legend('CBi-RRT','RRT','SBL');
 xlim([0 250]);%max([T1 T2])]);
 set(gca,'fontsize',13);
 
-
-set(h, 'Position', [100, 100, 800, 400]);
+set(h, 'Position', [100, 100, 800, 250]);
 % print success_abb_reg.eps -depsc -r200

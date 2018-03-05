@@ -7,11 +7,11 @@ clc
 
 %%
 planners = {'CBiRRT','RRT','SBL','PRM'};
-plannerType = planners{2};
+plannerType = planners{1};
 switch plannerType
     case 'CBiRRT'
-%         D = load('Benchmark_CBiRRT_env1_rB.txt'); D = D(D(:,2)==1,:);
-        D = load('Benchmark_CBiRRT_env1_temp.txt'); D = [2.6*ones(size(D,1),1) D]; D = D(D(:,2)==1,:); 
+        D = load('Benchmark_CBiRRT_env1_rB.txt'); D = D(D(:,2)==1,:);
+%         D = load('Benchmark_CBiRRT_env1_temp.txt'); D = [2.6*ones(size(D,1),1) D]; D = D(D(:,2)==1,:); 
     case 'RRT'
         D = load('Benchmark_RRT_env1_rB.txt'); D = D(D(:,2)==1,:);
     case 'SBL'
