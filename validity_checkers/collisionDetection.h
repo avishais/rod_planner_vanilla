@@ -7,7 +7,7 @@
 #include <GL/glut.h>
 #include "PQP.h"
 #include "model.h"
-#include "/home/avishai/Downloads/omplapp/ompl/Workspace/cplanner/simulator/MatVec.h"
+#include "/home/avishai/Documents/workspace/rod_planner_vanilla/simulator/MatVec.h"
 #include <iostream>
 #include <string>
 #include <vector>

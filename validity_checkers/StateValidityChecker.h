@@ -15,9 +15,9 @@
 #include "ompl/base/State.h"
 #include <ompl/config.h>
 
-#include "Rod_ODE_class.h"
-#include "abb_apc_class.h"
-#include "kdl_class.h"
+#include "../proj_classes/Rod_ODE_class.h"
+#include "../proj_classes/abb_apc_class.h"
+#include "../proj_classes/kdl_class.h"
 #include "collisionDetection.h"
 
 #include <iostream>

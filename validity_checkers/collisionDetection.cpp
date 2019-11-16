@@ -1,6 +1,6 @@
 #include "collisionDetection.h"
 
-#define CADLINK "/home/avishai/Downloads/omplapp/ompl/Workspace/cplanner/simulator/"
+#define CADLINK "/home/avishai/Documents/workspace/rod_planner_vanilla/simulator/"
 
 int collisionDetection::collision_state(Matrix M, State q1, State q2)
 // Returns 0 if no collision

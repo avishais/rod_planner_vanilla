@@ -50,26 +50,26 @@ ob::PlannerPtr plan_C::allocatePlanner(ob::SpaceInformationPtr si, plannerType p
             return std::make_shared<og::CBiRRT>(si, maxStep);
             break;
         }
-        case PLANNER_RRT:
-        {
-            return std::make_shared<og::RRT>(si, maxStep);
-            break;
-        }
-        /*case PLANNER_LAZYRRT:
-        {
-            return std::make_shared<og::LazyRRT>(si, maxStep);
-            break;
-        }*/
-        case PLANNER_PRM:
-        {
-            return std::make_shared<og::PRM>(si);
-            break;
-        }
-        case PLANNER_SBL:
-        {
-            return std::make_shared<og::SBL>(si, maxStep);
-            break;
-        }
+        // case PLANNER_RRT:
+        // {
+        //     return std::make_shared<og::RRT>(si, maxStep);
+        //     break;
+        // }
+        // /*case PLANNER_LAZYRRT:
+        // {
+        //     return std::make_shared<og::LazyRRT>(si, maxStep);
+        //     break;
+        // }*/
+        // case PLANNER_PRM:
+        // {
+        //     return std::make_shared<og::PRM>(si);
+        //     break;
+        // }
+        // case PLANNER_SBL:
+        // {
+        //     return std::make_shared<og::SBL>(si, maxStep);
+        //     break;
+        // }
         default:
         {
             OMPL_ERROR("Planner-type enum is not implemented in allocation function.");
@@ -156,11 +156,11 @@ void plan_C::plan(State c_start, State c_goal, double runtime, plannerType ptype
 	pdef->setStartAndGoalStates(start, goal);
 	pdef->print();
 
-	// Register new projection evaluator
-	if (ptype == PLANNER_SBL) {
-		//Cspace->registerProjection("myProjection", ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
-		Cspace->registerDefaultProjection(ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
-	}
+// 	// Register new projection evaluator
+// 	if (ptype == PLANNER_SBL) {
+// 		//Cspace->registerProjection("myProjection", ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
+// 		Cspace->registerDefaultProjection(ob::ProjectionEvaluatorPtr(new MyProjection(Cspace)));
+// 	}
 
 	maxStep = max_step;
 	// create a planner for the defined space
@@ -222,7 +222,7 @@ int main(int argn, char ** args) {
 	string plannerName;
 	int env; // Tested environment index
 
-	// Input ./<exefile> <runtime> <planner> <environement>
+	// Input ./<exefile> <runtime> <planner> <environment>
 
 	if (argn == 1) {
 		runtime = 1; // sec
@@ -271,7 +271,7 @@ int main(int argn, char ** args) {
 
 	plan_C Plan;
 
-	srand (time(NULL));
+	// srand (time(NULL));
 
 	State c_start, c_goal;
 	if (env == 1) {
