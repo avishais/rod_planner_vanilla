@@ -23,6 +23,7 @@
 #include <iostream>
 
 #define ROBOTS_DISTANCE 1085.85
+#define PI 3.1412
 
 namespace ob = ompl::base;
 using namespace std;

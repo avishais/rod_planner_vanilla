@@ -215,6 +215,49 @@ void plan_C::plan(State c_start, State c_goal, double runtime, plannerType ptype
 	}
 }
 
+void load_random_nodes(Matrix &Cdb) {
+	cout << "Getting random nodes." << endl;
+
+	std::ifstream File;
+	File.open("/home/avishai/Documents/workspace/rod_planner_vanilla/validity_checkers/randomnodes.txt");
+	//File.open("randomnodes.txt");
+
+	State c_temp(18);
+
+	int i = 0;
+	while(!File.eof()) {
+		for (int j=0; j < 18; j++) {
+			File >> c_temp[j];
+			// cout << c_temp[j] << " ";
+		}
+		// cout << endl;
+		Cdb.push_back(c_temp);
+		i++;
+		// cout << i << endl;
+	}
+	File.close();
+	Cdb.pop_back();
+}
+
+bool extract_from_perf_file(ofstream &ToFile) {
+	ifstream FromFile;
+	FromFile.open("./paths/perf_log.txt");
+
+	bool success = false;
+	string line;
+	int j = 1;
+	while (getline(FromFile, line)) {
+		ToFile << line << "\t";
+		if (j==1 && stoi(line))
+			success = true;
+		j++;
+	}
+
+	FromFile.close();
+
+	return success;
+}
+
 int main(int argn, char ** args) {
 	std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
 	double runtime; // Maximum allowed runtime
@@ -285,7 +328,44 @@ int main(int argn, char ** args) {
 	int mode = 1;
 	switch (mode) {
 	case 1: {
-		Plan.plan(c_start, c_goal, runtime, ptype, 2.6);
+		srand (time(NULL));
+
+		Matrix Cdb;
+		load_random_nodes(Cdb);
+
+		cout << Cdb.size() << endl;
+
+		std::ofstream ft;
+		ft.open("timesC.txt", ios::app);
+
+		int p1, p2;
+		for (int j = 1; j < 100; j++) {
+			// do {
+			// 	p1 = rand() % Cdb.size();
+			// 	p2 = rand() % Cdb.size();
+
+			// } while (p1==p2);
+			p1 = j;
+			p2 = j + 1;
+
+			cout << p1 << " " << p2 << endl;
+
+			runtime = 200.;
+			Plan.plan(Cdb[p1], Cdb[p2], runtime, PLANNER_CBIRRT, 2.6);
+
+			// Log
+			ft << p1 << "\t" << p2 << "\t";
+			bool suc = extract_from_perf_file(ft);
+			ft << endl;
+
+			if (suc) {
+				cout << "Found solution for random query.\n";
+			}
+		}
+		ft.close();
+		break;
+
+		// Plan.plan(c_start, c_goal, runtime, ptype, 2.6);
 
 		break;
 	}
